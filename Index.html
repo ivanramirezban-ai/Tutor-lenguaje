@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutor Virtual — Lenguaje UNMSM</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f5f0e8;
+  --surface: #fffdf8;
+  --border: #d4c9b0;
+  --accent: #2d5016;
+  --accent2: #7a9e3b;
+  --text: #1a1a0f;
+  --muted: #6b6550;
+  --user-bg: #2d5016;
+  --user-text: #f5f0e8;
+  --bot-bg: #fffdf8;
+  --error: #8b2020;
+  --success: #2d5016;
+  --badge: #e8f0d8;
+  --warning: #b8860b;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+header {
+  background: var(--accent);
+  color: var(--bg);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: white;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+header h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  font-weight: 400;
+}
+
+header p { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+.level-info {
+  margin-left: auto;
+  text-align: right;
+}
+
+.level-badge {
+  background: var(--accent2);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.progress-bar { height: 5px; background: var(--border); }
+.progress-fill {
+  height: 100%;
+  background: var(--accent2);
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.levels-strip {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.level-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.level-dot .dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  transition: all 0.3s;
+}
+
+.level-dot.active .dot { background: var(--accent2); color: white; }
+.level-dot.done .dot { background: var(--accent); color: white; }
+.level-dot span { font-size: 9px; color: var(--muted); text-align: center; max-width: 50px; line-height: 1.2; }
+
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 350px;
+  max-height: 420px;
+}
+
+.msg-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: fadeUp 0.3s ease;
+}
+
+.msg-row.user { flex-direction: row-reverse; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: white;
+  flex-shrink: 0;
+  overflow: hidden;
+  font-family: 'DM Serif Display', serif;
+}
+
+.msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.bubble {
+  max-width: 78%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.bubble.bot {
+  background: var(--bot-bg);
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+}
+
+.bubble.user {
+  background: var(--user-bg);
+  color: var(--user-text);
+  border-top-right-radius: 4px;
+}
+
+.bubble .sender {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--accent);
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.options-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+
+.opt-btn {
+  background: var(--badge);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+
+.opt-btn:hover:not(:disabled) { border-color: var(--accent2); background: #ddeab8; }
+.opt-btn.correct { border-color: var(--success); background: #d4ebbf; color: var(--success); font-weight: 500; }
+.opt-btn.wrong { border-color: var(--error); background: #f5dada; color: var(--error); }
+.opt-btn:disabled { cursor: default; opacity: 0.8; }
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.topic-btn {
+  background: var(--badge);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+
+.topic-btn:hover:not(:disabled) { border-color: var(--accent2); background: #ddeab8; }
+
+.extras-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.extra-btn {
+  background: var(--surface);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+
+.extra-btn:hover { border-color: var(--accent2); color: var(--text); background: #ddeab8; }
+
+.rubric-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.rubric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  gap: 8px;
+}
+
+.rubric-row:last-child { border-bottom: none; }
+.rubric-criterio { flex: 1; font-weight: 500; }
+.rubric-nivel { font-size: 11px; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+.nivel-experto { background: #d4ebbf; color: var(--success); }
+.nivel-proceso { background: #fef3cd; color: var(--warning); }
+.nivel-principiante { background: #f5dada; color: var(--error); }
+.rubric-pts { font-weight: 600; color: var(--accent); min-width: 40px; text-align: right; }
+
+.nota-final {
+  text-align: center;
+  padding: 12px;
+  margin-top: 10px;
+  background: var(--badge);
+  border-radius: 10px;
+}
+
+.nota-numero {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  color: var(--accent);
+}
+
+.nota-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.input-area {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.extras-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.extra-pill {
+  background: var(--badge);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.extra-pill:hover { border-color: var(--accent2); color: var(--accent); }
+
+.input-row { display: flex; gap: 8px; }
+
+textarea {
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  resize: none;
+  outline: none;
+  min-height: 44px;
+  max-height: 120px;
+  transition: border-color 0.2s;
+}
+
+textarea:focus { border-color: var(--accent2); }
+textarea:disabled { opacity: 0.5; }
+
+button#send-btn {
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  align-self: flex-end;
+}
+
+button#send-btn:hover:not(:disabled) { background: var(--accent2); }
+button#send-btn:disabled { opacity: 0.5; cursor: default; }
+
+.typing {
+  display: flex; gap: 4px; padding: 4px 0; align-items: center;
+}
+.typing span {
+  width: 7px; height: 7px;
+  background: var(--muted);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%,60%,100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.level-complete {
+  text-align: center;
+  padding: 16px;
+}
+
+.level-complete .medal { font-size: 40px; margin-bottom: 8px; }
+.level-complete h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.level-complete p { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+.continue-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.continue-btn:hover { background: var(--accent2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="avatar" id="header-avatar">DR</div>
+  <div>
+    <p style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em">Tutor Virtual · Lenguaje UNMSM</p>
+    <h1>Tutor Lenguaje</h1>
+  </div>
+  <div class="level-info">
+    <div class="level-badge" id="level-label">Inicio</div>
+  </div>
+</header>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<div class="levels-strip" id="levels-strip">
+  <div class="level-dot active" id="dot-0"><div class="dot">★</div><span>Inicio</span></div>
+  <div class="level-dot" id="dot-1"><div class="dot">1</div><span>Tema</span></div>
+  <div class="level-dot" id="dot-2"><div class="dot">2</div><span>Fuentes</span></div>
+  <div class="level-dot" id="dot-3"><div class="dot">3</div><span>Tesis</span></div>
+  <div class="level-dot" id="dot-4"><div class="dot">4</div><span>Esquema</span></div>
+  <div class="level-dot" id="dot-5"><div class="dot">5</div><span>Desarrollo</span></div>
+  <div class="level-dot" id="dot-6"><div class="dot">6</div><span>Revisión</span></div>
+</div>
+
+<div class="chat-area" id="chat"></div>
+
+<div class="input-area">
+  <div class="extras-bar" id="extras-bar" style="display:none">
+    <span style="font-size:11px;color:var(--muted);align-self:center">Extras:</span>
+    <button class="extra-pill" onclick="activateExtra('introduccion')">📝 Introducción</button>
+    <button class="extra-pill" onclick="activateExtra('conclusion')">🔚 Conclusión</button>
+    <button class="extra-pill" onclick="activateExtra('ortografia')">✏️ Ortografía</button>
+    <button class="extra-pill" onclick="activateExtra('coherencia')">🔗 Coherencia</button>
+    <button class="extra-pill" onclick="activateExtra('cohesion')">🧩 Cohesión</button>
+    <button class="extra-pill" onclick="activateExtra('registro')">🎓 Registro académico</button>
+  </div>
+  <div class="input-row">
+    <textarea id="user-input" placeholder="Escribe tu respuesta aquí..." rows="1" disabled></textarea>
+    <button id="send-btn" onclick="sendMessage()" disabled>Enviar</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN — Reemplaza con tu API key real
+// ============================================================
+
+// ============================================================
+// GOOGLE SHEETS — Registro de datos de investigación
+// ============================================================
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycby4L1Qw5MHSZwHx795iVgopZYO4yimEu5bfrmNEpDwlQ0VYswDjcF50clGYWrUqWDBoAA/exec";
+
+async function saveToSheets(event, extra = {}) {
+  try {
+    await fetch(SHEETS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        timestamp: new Date().toISOString(),
+        student: state.studentName || "",
+        group: state.groupNumber || "",
+        groupSize: state.groupSize || "",
+        topic: state.groupTopic || "",
+        level: state.currentLevel || 0,
+        event: event,
+        extra: extra
+      })
+    });
+  } catch(e) {
+    console.log("Sheets no disponible:", e);
+  }
+}
+
+// ============================================================
+// LOCAL STORAGE — Guardar progreso del alumno entre sesiones
+// ============================================================
+const STORAGE_KEY = "tutor_lenguaje_progress";
+
+function saveProgress() {
+  try {
+    const progress = {
+      studentName: state.studentName,
+      groupNumber: state.groupNumber,
+      groupSize: state.groupSize,
+      groupTopic: state.groupTopic,
+      delimitacion: state.delimitacion,
+      thesis: state.thesis,
+      sources: state.sources,
+      argument: state.argument,
+      currentLevel: state.currentLevel,
+      completedLevels: state.completedLevels || []
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  } catch(e) {
+    console.log("localStorage no disponible:", e);
+  }
+}
+
+function loadProgress() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return null;
+    return JSON.parse(saved);
+  } catch(e) {
+    return null;
+  }
+}
+
+function clearProgress() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch(e) {}
+}
+
+const API_KEY = "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";
+const ELEVENLABS_API_KEY = "sk_b88a1dcd50c091fc6afb63c227c727f8cc29df266734fbf4";
+const ELEVENLABS_VOICE_ID = "qjnjSEiHF0G6theFSflX";
+
+// Cola de audio para evitar que se mezclen
+let audioQueue = [];
+let audioPlaying = false;
+
+async function playNextAudio() {
+  if (audioPlaying || audioQueue.length === 0) return;
+  audioPlaying = true;
+  const url = audioQueue.shift();
+  const audio = new Audio(url);
+  audio.onended = () => { audioPlaying = false; playNextAudio(); };
+  audio.onerror = () => { audioPlaying = false; playNextAudio(); };
+  audio.play();
+}
+
+async function speakText(text) {
+  try {
+    // No leer si es HTML con opciones de ejercicio
+    if (text.includes('opt-btn') || text.includes('topic-btn') || text.includes('opts-')) return;
+    // No leer textos muy cortos o muy largos
+    const clean = text.replace(/<[^>]*>/g, "").replace(/[#*_`]/g, "").trim();
+    if (!clean || clean.length < 10 || clean.length > 600) return;
+
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "xi-api-key": ELEVENLABS_API_KEY
+      },
+      body: JSON.stringify({
+        text: clean,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability: 0.75, similarity_boost: 0.60, style: 0.15, use_speaker_boost: false }
+      })
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    audioQueue.push(url);
+    playNextAudio();
+  } catch(e) {
+    console.log("Audio no disponible:", e);
+  }
+}
+
+const AVATAR_URL = "data:image/jpeg;base64,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"; // URL de la foto del docente (opcional)
+
+const TOPICS = [
+  "Corrupción en el Estado","Violencia de género","Deserción escolar",
+  "Informalidad laboral","Seguridad ciudadana","Contaminación ambiental",
+  "Migración venezolana","Acceso a salud en zonas rurales","Embarazo adolescente",
+  "Trata de personas","Pobreza urbana","Discriminación racial",
+  "Trabajo infantil","Violencia familiar","Desnutrición infantil"
+];
+
+const LEVELS = [
+  { name: "Inicio", key: "welcome" },
+  { name: "Nivel 1 — Delimitación del tema", key: "nivel1" },
+  { name: "Nivel 2 — Revisión de fuentes", key: "nivel2" },
+  { name: "Nivel 3 — Planteamiento de tesis", key: "nivel3" },
+  { name: "Nivel 4 — Esquema de argumentos", key: "nivel4" },
+  { name: "Nivel 5 — Párrafo de desarrollo", key: "nivel5" },
+  { name: "Nivel 6 — Revisión final", key: "nivel6" }
+];
+
+let state = {
+  currentLevel: 0,
+  topic: null,
+  phase: "welcome",
+  exercisesDone: 0,
+  history: [],
+  inputEnabled: false,
+  studentName: null,
+  groupNumber: null,
+  groupSize: null,
+  groupTopic: null,
+  delimitacion: null,
+  groupRole: null,
+  thesis: null,
+  sources: [],
+  argument: null,
+  completedLevels: [],
+  dataLog: []
+};
+
+// ============================================================
+// UTILIDADES UI
+// ============================================================
+const chat = document.getElementById("chat");
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+
+if (AVATAR_URL) {
+  document.getElementById("header-avatar").innerHTML = `<img src="${AVATAR_URL}" alt="Docente">`;
+}
+
+function setInput(enabled) {
+  state.inputEnabled = enabled;
+  input.disabled = !enabled;
+  sendBtn.disabled = !enabled;
+}
+
+function scrollDown() { chat.scrollTop = chat.scrollHeight; }
+
+function addBubble(role, html, isHTML = true) {
+  const row = document.createElement("div");
+  row.className = `msg-row ${role}`;
+
+  if (role === "bot") {
+    const av = document.createElement("div");
+    av.className = "msg-avatar";
+    av.innerHTML = AVATAR_URL ? `<img src="${AVATAR_URL}">` : "DR";
+    row.appendChild(av);
+  }
+
+  const bub = document.createElement("div");
+  bub.className = `bubble ${role}`;
+
+  if (role === "bot") {
+    const sender = document.createElement("div");
+    sender.className = "sender";
+    sender.textContent = "Tutor";
+    bub.appendChild(sender);
+  }
+
+  const body = document.createElement("div");
+  if (isHTML) body.innerHTML = html;
+  else body.textContent = html;
+  bub.appendChild(body);
+  row.appendChild(bub);
+  chat.appendChild(row);
+  scrollDown();
+  if (role === "bot" && typeof speakText === "function") {
+    const plainText = body.innerText || body.textContent || "";
+    if (plainText.length > 5 && plainText.length < 800) speakText(plainText);
+  }
+  return body;
+}
+
+function addTyping() {
+  const row = document.createElement("div");
+  row.className = "msg-row bot";
+  row.id = "typing";
+  const av = document.createElement("div");
+  av.className = "msg-avatar";
+  av.innerHTML = AVATAR_URL ? `<img src="${AVATAR_URL}">` : "DR";
+  row.appendChild(av);
+  const bub = document.createElement("div");
+  bub.className = "bubble bot";
+  bub.innerHTML = `<div class="sender">Tutor</div><div class="typing"><span></span><span></span><span></span></div>`;
+  row.appendChild(bub);
+  chat.appendChild(row);
+  scrollDown();
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing");
+  if (t) t.remove();
+}
+
+function updateProgress(level) {
+  const pct = (level / 6) * 100;
+  document.getElementById("progress").style.width = pct + "%";
+  document.getElementById("level-label").textContent = LEVELS[level].name;
+  for (let i = 0; i <= 6; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    dot.className = "level-dot" + (i < level ? " done" : i === level ? " active" : "");
+  }
+  if (level >= 2) document.getElementById("extras-bar").style.display = "flex";
+}
+
+function logData(event, data) {
+  state.dataLog.push({
+    timestamp: new Date().toISOString(),
+    student: state.studentName,
+    group: state.groupNumber,
+    topic: state.groupTopic,
+    level: state.currentLevel,
+    event,
+    ...data
+  });
+  // Guardar en Google Sheets
+  saveToSheets(event, data);
+  // Guardar progreso en localStorage
+  saveProgress();
+}
+
+// ============================================================
+// API CALL
+// ============================================================
+async function callClaude(system, messages, json = false) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1000,
+      system,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (!data.content) throw new Error(JSON.stringify(data));
+  const text = data.content[0].text.trim();
+  if (json) return JSON.parse(text.replace(/```json|```/g, "").trim());
+  return text;
+}
+
+// ============================================================
+// SYSTEM PROMPTS
+// ============================================================
+function getSystemPrompt() {
+  const otherTopics = TOPICS.filter(t => t !== state.topic).slice(0, 5).join(", ");
+  const fechaLimite = new Date("2026-07-11");
+  const hoy = new Date();
+  const sistemaVencido = hoy > fechaLimite;
+
+  return `Eres un tutor virtual de escritura académica del curso de Lenguaje de la Universidad Nacional Mayor de San Marcos (UNMSM), Lima, Perú. Representas al docente del curso.
+
+FECHA LÍMITE DEL SISTEMA: viernes 11 de julio de 2025.
+${sistemaVencido ? "SISTEMA CERRADO: El periodo de uso ha concluido. Informa al alumno que el sistema ya no está disponible y agradece su participación." : "El sistema está activo."}
+
+ESTILO PEDAGÓGICO (crítico — no modificar):
+- Señalas el error con claridad y brevedad
+- Sugieres cómo corregirlo en pocas palabras
+- Cuando das un ejemplo, SIEMPRE usas un tema diferente al del alumno, tomado de: ${otherTopics}
+- Nunca das la respuesta directa — guías al alumno para que llegue solo
+- Eres amable pero directo, como un docente universitario peruano
+- Máximo 4-5 oraciones por respuesta
+- NUNCA uses markdown, asteriscos, negritas (**), guiones de lista ni formato especial — solo texto plano
+- Responde siempre en español
+
+PROHIBICIÓN ABSOLUTA — REDACCIÓN:
+Bajo ninguna circunstancia redactas, completas ni reescribes texto para el alumno.
+Esto incluye: delimitaciones, tesis, párrafos, oraciones, fuentes o cualquier parte del ensayo.
+Si el alumno te pide que redactes algo por él, recuérdale amablemente que tu rol es guiarlo,
+no escribir por él, y devuélvele la tarea con una pregunta que lo oriente.
+
+DATOS DEL ALUMNO:
+- Nombre: ${state.studentName || "no registrado"}
+- Número de grupo: ${state.groupNumber || "no registrado"}
+- Integrantes del grupo: ${state.groupSize || "no registrado"}
+- Tema del grupo: ${state.groupTopic || "no elegido aún"}
+- Delimitación provisional: ${state.delimitacion || "no registrada aún"}
+- Tesis: ${state.thesis || "no planteada aún"}
+- Fuentes: ${state.sources.length > 0 ? state.sources.join("; ") : "no registradas aún"}
+- Argumento asignado: ${state.argument || "no asignado aún"}
+- Nivel actual: ${LEVELS[state.currentLevel].name}
+- Fase: ${state.phase}
+
+REGLA INNEGOCIABLE — CONTEXTO PERUANO:
+El tema SIEMPRE debe referirse al Perú. Nunca apruebes un tema que no tenga al Perú como contexto central.
+Se permite referenciar otros países (Colombia, Brasil, etc.) ÚNICAMENTE para proponer la aplicación
+de sus experiencias en el Perú. Ejemplo válido: "Aplicación de estrategias colombianas para reducir
+el embarazo adolescente en la región Loreto, 2024".
+Si el alumno propone un tema sin vincularlo al Perú, señala el error y guíalo para reencuadrarlo.
+
+REGLA — SALTAR NIVELES PROHIBIDO:
+El alumno debe completar los niveles en orden. No puedes aprobar un nivel si el anterior no está aprobado.
+Si el alumno intenta saltar un nivel, recuérdale que debe completar el nivel actual primero.
+
+CRITERIOS POR NIVEL:
+
+NIVEL 1 — Delimitación provisional del tema:
+La delimitación es PROVISIONAL — el alumno puede ajustarla en el Nivel 2 según las fuentes que encuentre.
+Una delimitación válida debe tener los tres elementos: (1) población o sujeto específico,
+(2) contexto geográfico — puede ser todo el Perú o una región específica según el tema,
+(3) periodo temporal con años específicos.
+
+IMPORTANTE SOBRE EL CONTEXTO GEOGRÁFICO:
+No exijas siempre una región específica. Muchos temas tienen fuentes a nivel nacional y es válido
+delimitar con "en el Perú" como contexto geográfico. Solo sugiere una región específica si el
+alumno está tratando un tema donde tiene sentido regionalizarlo.
+Ejemplos válidos:
+- "Las causas de la deserción escolar en el Perú entre 2020 y 2025" — válido, contexto nacional
+- "La violencia de género en adolescentes de Lima entre 2019 y 2023" — válido, contexto regional
+- "La informalidad laboral en Perú en los últimos 5 años" — válido, contexto nacional
+
+Si los tres elementos están presentes aunque sean provisionales, aprueba.
+Al aprobar dile que la delimitación es provisional y podrá ajustarla en el Nivel 2 según las fuentes.
+Si aprueba escribe exactamente: NIVEL_APROBADO
+
+NIVEL 2 — Revisión de fuentes:
+Al inicio de este nivel pide al alumno que te recuerde su delimitación provisional del Nivel 1.
+El alumno debe presentar mínimo 3 fuentes académicas o periodísticas serias (no Wikipedia, no blogs).
+Cada fuente debe tener: autor, año y título. Las citas APA solo requieren número de página cuando son citas textuales directas — no en paráfrasis.
+Si las fuentes no coinciden exactamente con la delimitación provisional, guía al alumno para
+ajustar el tema según lo disponible — siempre manteniendo el Perú como contexto central.
+Ejemplo de ajuste válido: si buscaba consecuencias en Iquitos 2023-2025 pero solo encontró
+estudios de causas en Perú 2018-2022, el tema puede ajustarse a eso.
+Si aprueba escribe exactamente: NIVEL_APROBADO
+
+NIVEL 3 — Planteamiento de tesis:
+La tesis debe ser: una afirmación debatible (no un hecho), coherente con el tema ajustado en el Nivel 2, específica y argumentable con las fuentes disponibles.
+FLEXIBILIDAD DE LA TESIS: La tesis puede mencionar 1, 2 o 3 causas/argumentos — todas son válidas. No exijas un formato específico ni un número determinado de causas. Lo importante es que sea debatible y específica.
+Si aprueba escribe exactamente: NIVEL_APROBADO
+
+MINI CLASE INTRODUCTORIA (al inicio de cada nivel, antes de los ejercicios):
+Genera una clase breve de máximo 5-6 oraciones que explique el concepto central del nivel.
+La clase debe:
+- Usar lenguaje claro y accesible para universitarios de primer año
+- Incluir un ejemplo concreto usando un tema de problemática peruana diferente al del alumno
+- Conectar el concepto con lo trabajado en niveles anteriores
+- Anticipar el error más frecuente que cometen los alumnos en ese nivel
+- Terminar con una pregunta motivadora que prepare al alumno para los ejercicios
+
+Contenido por nivel:
+  Nivel 1: qué es delimitar un tema, los tres elementos obligatorios y cómo las fuentes pueden ajustar la delimitación
+  Nivel 2: qué es una fuente académica, cómo distinguirla, cómo leer una referencia bibliográfica
+  Nivel 3: qué es una tesis, diferencia entre tesis/tema/pregunta, cómo construir una afirmación debatible
+  Nivel 4: qué es el esquema de desarrollo, qué son evidencias y análisis, cómo redactar en frases no párrafos
+  Nivel 5: qué es un párrafo académico, oraciones bimembres, cómo combinar evidencia y análisis, cómo citar en APA 7ma
+  Nivel 6: cómo funciona la rúbrica, qué significa cada nivel gamificado, qué se espera de un texto Experto
+
+NIVEL 4 — Esquema de argumentos:
+El alumno presenta su esquema en texto con esta estructura obligatoria:
+  1. ARGUMENTO: una frase que defienda la tesis del grupo
+  2. EVIDENCIAS: hasta 3 frases extraídas de las fuentes del Nivel 2, cada una con su cita APA 7ma
+  3. ANÁLISIS: hasta 3 frases que expliquen cómo las evidencias sustentan el argumento y la tesis
+
+CRITERIOS DE EVALUACIÓN DEL ESQUEMA:
+- Todo debe estar redactado en frases — NO en párrafos
+- Las evidencias deben tener citas APA 7ma
+- El argumento debe ser coherente con la tesis del Nivel 3
+- El análisis debe mostrar relaciones lógicas — causa-efecto, generalización, definición
+
+ERRORES FRECUENTES A DETECTAR:
+- Evidencias sin cita
+- Análisis ausente o confundido con evidencia
+- Argumento que no defiende la tesis
+FLEXIBILIDAD DEL ESQUEMA: El esquema acepta frases cortas, incompletas o telegráficas — NO exijas oraciones completas con sujeto y verbo. El esquema es un borrador de ideas, no un párrafo redactado. Solo exige que la idea sea comprensible y la cita esté presente en las evidencias.
+
+La estructura es una guía — puede haber flexibilidad en el orden pero los tres elementos deben estar presentes.
+Si aprueba escribe exactamente: NIVEL_APROBADO
+
+NIVEL 5 — Párrafo de desarrollo:
+PARÁMETROS OBLIGATORIOS:
+  1. Encabezado con el argumento — primera oración que enuncia la postura
+  2. Todas las oraciones deben ser bimembres — con sujeto explícito o tácito
+  3. Citas APA 7ma para todo lo extraído de fuentes — si hay citas mal redactadas señala cuántas y cómo corregirlas
+  4. Extensión entre 200 y 250 palabras — ni más ni menos
+  5. El análisis es el elemento más valorado — evalúa la habilidad argumentativa del alumno
+
+DOS MODALIDADES VÁLIDAS:
+  Modalidad 1 — Intercalada: Evidencia 1 + análisis 1 → Evidencia 2 + análisis 2
+  Modalidad 2 — Bloques: Evidencia 1 + Evidencia 2 → Análisis conjunto de ambas
+
+CRITERIOS DE EVALUACIÓN DEL PÁRRAFO:
+- Si no hay argumento como encabezado → señala y pide reformular
+- Si hay oraciones unimembres → señala cuáles y pide corregirlas
+- Si hay citas mal redactadas en APA 7ma → indica cuántas y guía la corrección — no rechaza todo el párrafo
+- Si el párrafo tiene menos de 200 o más de 250 palabras → indica la extensión actual y pide ajustar
+- Si el análisis es superficial o ausente → señala que es el elemento más importante y guía al alumno para profundizarlo
+- Si la modalidad es mixta o poco clara → acepta si los elementos están presentes
+
+No rechaces el párrafo por un solo error — señala todos los errores encontrados y da oportunidad de corregir.
+Si todos los parámetros se cumplen escribe exactamente: NIVEL_APROBADO
+
+NIVEL 6 — Revisión final con rúbrica:
+El alumno pega el ensayo completo del grupo.
+Evalúa SOLO el párrafo de desarrollo del alumno. Tema y tesis se evalúan grupalmente.
+
+RÚBRICA CON DESCRIPTORES ALINEADOS A LOS NIVELES 4 Y 5:
+
+Criterio 1 — Tema (grupal, máx. 3 pts):
+  Principiante (0-1): tema amplio, vago, sin los tres elementos de delimitación
+  En proceso (1.5-2): delimitado pero incompleto o poco actualizado
+  Experto (2.5-3): correctamente delimitado con población, lugar y periodo. Relevante y actual.
+
+Criterio 2 — Tesis (grupal, máx. 3 pts):
+  Principiante (0-1): ausente, confusa o no debatible
+  En proceso (1.5-2): coherente pero débil o poco específica
+  Experto (2.5-3): clara, debatible, específica y coherente con el tema
+
+Criterio 3 — Evidencias (individual, máx. 4 pts):
+  Principiante (0-1): sin fuentes académicas o sin citas APA
+  En proceso (1.5-2.5): fuentes presentes pero con citas APA incorrectas o incompletas
+  Experto (3-4): fuentes académicas correctamente citadas en APA 7ma. Evidencias pertinentes al argumento.
+
+Criterio 4 — Argumentación (individual, máx. 4 pts):
+  Principiante (0-1): sin argumento como encabezado o sin análisis real
+  En proceso (1.5-2.5): argumento presente pero análisis superficial o confundido con evidencia
+  Experto (3-4): argumento claro como encabezado. Análisis profundo que establece relaciones lógicas
+  y demuestra habilidad argumentativa real. Modalidad intercalada o por bloques bien ejecutada.
+
+Criterio 5 — Coherencia y cohesión (individual, máx. 3 pts):
+  Principiante (0-1): sin conectores, texto desarticulado o extensión fuera del rango 200-250 palabras
+  En proceso (1.5-2): algunos conectores, coherencia parcial, extensión cercana al rango
+  Experto (2.5-3): conectores apropiados, texto fluido, extensión dentro del rango 200-250 palabras
+
+Criterio 6 — Gramática (individual, máx. 2 pts):
+  Principiante (0-0.5): oraciones unimembres frecuentes, léxico inapropiado para registro académico
+  En proceso (1): mayoría de oraciones bimembres pero con algunos errores, léxico aceptable
+  Experto (1.5-2): todas las oraciones son bimembres, léxico académico preciso y variado
+
+Criterio 7 — Ortografía (individual, máx. 1 pt):
+  Principiante (0): 5 o más errores ortográficos
+  En proceso (0.5): 2 a 4 errores moderados
+  Experto (1): sin errores o máximo 1 error menor
+
+Responde ÚNICAMENTE en JSON con este formato exacto:
+{"criterios":[{"nombre":"Tema","nivel":"Experto","pts":3,"max":3,"feedback":"..."},{"nombre":"Tesis","nivel":"En proceso","pts":1.5,"max":3,"feedback":"..."},{"nombre":"Evidencias","nivel":"Experto","pts":4,"max":4,"feedback":"..."},{"nombre":"Argumentación","nivel":"Principiante","pts":0,"max":4,"feedback":"..."},{"nombre":"Coherencia y cohesión","nivel":"En proceso","pts":1.5,"max":3,"feedback":"..."},{"nombre":"Gramática","nivel":"Experto","pts":2,"max":2,"feedback":"..."},{"nombre":"Ortografía","nivel":"Experto","pts":1,"max":1,"feedback":"..."}],"nota_total":13,"mensaje_final":"texto motivador"}`;
+}
+
+// ============================================================
+// BOT RESPOND
+// ============================================================
+async function botRespond(userMsg) {
+  setInput(false);
+  addTyping();
+  state.history.push({ role: "user", content: userMsg });
+  logData("user_message", { text: userMsg, phase: state.phase });
+
+  try {
+    const isLevel6 = state.currentLevel === 6 && state.phase === "application";
+    const reply = await callClaude(getSystemPrompt(), state.history, isLevel6);
+    removeTyping();
+    state.history.push({ role: "assistant", content: isLevel6 ? JSON.stringify(reply) : reply });
+
+    if (isLevel6 && typeof reply === "object") {
+      renderRubric(reply);
+      logData("rubric_result", { nota: reply.nota_total, criterios: reply.criterios });
+    } else if (typeof reply === "string" && reply.includes("NIVEL_APROBADO")) {
+      const clean = reply.replace("NIVEL_APROBADO", "").trim();
+      if (clean) addBubble("bot", clean, false);
+      logData("level_approved", { level: state.currentLevel });
+      setTimeout(() => showLevelComplete(), 800);
+    } else {
+      addBubble("bot", reply, false);
+      setInput(true);
+    }
+  } catch(e) {
+    removeTyping();
+    addBubble("bot", "Hubo un error de conexión. Por favor intenta de nuevo.", false);
+    setInput(true);
+  }
+}
+
+// ============================================================
+// RENDERIZADO DE RÚBRICA
+// ============================================================
+function renderRubric(data) {
+  const emojiNivel = { "Experto": "🏆", "En proceso": "⚙️", "Principiante": "🌱" };
+  const classNivel = { "Experto": "nivel-experto", "En proceso": "nivel-proceso", "Principiante": "nivel-principiante" };
+
+  let html = `<div style="margin-bottom:10px;font-weight:500">Resultados de tu evaluación:</div>
+  <div class="rubric-card">`;
+
+  data.criterios.forEach(c => {
+    html += `<div class="rubric-row">
+      <div class="rubric-criterio">${c.nombre}</div>
+      <div class="rubric-nivel ${classNivel[c.nivel]}">${emojiNivel[c.nivel]} ${c.nivel}</div>
+      <div class="rubric-pts">${c.pts}/${c.max}</div>
+    </div>`;
+  });
+
+  html += `</div>
+  <div class="nota-final">
+    <div class="nota-numero">${data.nota_total}</div>
+    <div class="nota-label">/ 20 — Nota previa del chatbot</div>
+  </div>
+  <div style="margin-top:12px;font-size:13px;color:var(--muted);line-height:1.6">${data.mensaje_final}</div>
+  <div style="margin-top:10px;font-size:12px;color:var(--muted);font-style:italic">Esta nota será corroborada por tu docente.</div>`;
+
+  addBubble("bot", html);
+
+  // Feedback por criterio
+  const enProceso = data.criterios.filter(c => c.nivel !== "Experto");
+  if (enProceso.length > 0) {
+    let fbHtml = `<div style="font-weight:500;margin-bottom:8px">Retroalimentación específica:</div>`;
+    enProceso.forEach(c => {
+      fbHtml += `<div style="margin-bottom:8px"><strong>${emojiNivel[c.nivel]} ${c.nombre}:</strong> ${c.feedback}</div>`;
+    });
+    setTimeout(() => addBubble("bot", fbHtml), 800);
+  }
+  setInput(false);
+}
+
+// ============================================================
+// LEVEL COMPLETE
+// ============================================================
+function showLevelComplete() {
+  const medals = ["", "🏅", "🏅🏅", "🏅🏅🏅", "🏅🏅🏅🏅", "🏅🏅🏅🏅🏅"];
+  const body = addBubble("bot", "");
+  body.innerHTML = `<div class="level-complete">
+    <div class="medal">${medals[state.currentLevel] || "🎖️"}</div>
+    <h3>¡${LEVELS[state.currentLevel].name} completado!</h3>
+    <p>${getLevelCompleteMsg()}</p>
+    <button class="continue-btn" onclick="goNextLevel()">Continuar al siguiente nivel →</button>
+  </div>`;
+  setInput(false);
+}
+
+function getLevelCompleteMsg() {
+  const msgs = [
+    "",
+    "Has aprendido a delimitar correctamente tu tema académico.",
+    "Has seleccionado fuentes académicas válidas para tu ensayo.",
+    "Tu tesis está bien planteada y es debatible.",
+    "Tu argumento está bien estructurado y respaldado.",
+    "Tu párrafo de desarrollo cumple con todos los criterios académicos.",
+    "¡Has completado el proceso completo del ensayo!"
+  ];
+  return msgs[state.currentLevel] || "";
+}
+
+function goNextLevel() {
+  const prev = state.currentLevel;
+  state.currentLevel++;
+  state.phase = "welcome";
+  state.exercisesDone = 0;
+  updateProgress(state.currentLevel);
+  logData("level_start", { level: state.currentLevel });
+
+  if (state.currentLevel > 6) {
+    addBubble("bot", "¡Felicitaciones! Has completado todos los niveles del ensayo académico. 🎓", false);
+    return;
+  }
+  startLevel(state.currentLevel);
+}
+
+// ============================================================
+// EJERCICIOS DE PRÁCTICA
+// ============================================================
+async function generateExercise(levelKey) {
+  state.phase = "exercise";
+  state.exercisesDone++;
+  setInput(false);
+  addTyping();
+
+  const otherTopics = TOPICS.filter(t => t !== state.topic);
+  const exTopic = otherTopics[Math.floor(Math.random() * otherTopics.length)];
+
+  const prompts = {
+    nivel1: `Genera un ejercicio de opción múltiple sobre delimitación de tema académico usando el tema "${exTopic}". Una opción correcta (tiene población + contexto geográfico peruano + periodo temporal). Tres incorrectas con errores típicos.`,
+    nivel2: `Genera un ejercicio de opción múltiple sobre revisión de fuentes académicas usando el tema "${exTopic}". Una opción correcta (fuente académica con autor, año y título). Tres incorrectas (Wikipedia, blog, sin datos completos).`,
+    nivel3: `Genera un ejercicio de opción múltiple sobre planteamiento de tesis usando el tema "${exTopic}". Una opción correcta (afirmación debatible y específica). Tres incorrectas (hecho, pregunta, o demasiado vaga).`
+  };
+
+  const prompt = prompts[levelKey] || prompts.nivel1;
+
+  try {
+    const ex = await callClaude(
+      `Responde ÚNICAMENTE en JSON válido sin markdown: {"pregunta":"...","tema_ejercicio":"${exTopic}","opciones":[{"letra":"A","texto":"..."},{"letra":"B","texto":"..."},{"letra":"C","texto":"..."},{"letra":"D","texto":"..."}],"correcta":"A","explicacion_correcta":"...","explicacion_error":"..."}`,
+      [{ role: "user", content: prompt }],
+      true
+    );
+    removeTyping();
+    renderExercise(ex, levelKey);
+  } catch(e) {
+    removeTyping();
+    addBubble("bot", "No pude generar el ejercicio. Vamos directamente a la práctica con tu tema.", false);
+    state.phase = "application";
+    startApplication(levelKey);
+    setInput(true);
+  }
+}
+
+function renderExercise(ex, levelKey) {
+  const num = state.exercisesDone;
+  let html = `<div style="margin-bottom:8px;font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Ejercicio ${num} de 2 · Tema: ${ex.tema_ejercicio}</div>`;
+  html += `<div style="margin-bottom:10px;line-height:1.5">${ex.pregunta}</div>`;
+  html += `<div class="options-grid" id="opts-${num}">`;
+  ex.opciones.forEach(op => {
+    const safe = ex.explicacion_correcta.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    const safeErr = ex.explicacion_error.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    html += `<button class="opt-btn" data-letra="${op.letra}" onclick="checkAnswer(this,'${op.letra}','${ex.correcta}',${num},'${safe}','${safeErr}','${levelKey}')">
+      <strong>${op.letra}.</strong> ${op.texto}
+    </button>`;
+  });
+  html += `</div><div id="fb-${num}" style="margin-top:8px;font-size:13px;line-height:1.5"></div>`;
+  addBubble("bot", html);
+}
+
+async function checkAnswer(btn, chosen, correct, num, expOk, expErr, levelKey) {
+  const grid = document.getElementById(`opts-${num}`);
+  const fb = document.getElementById(`fb-${num}`);
+  grid.querySelectorAll(".opt-btn").forEach(b => {
+    b.disabled = true;
+    if (b.dataset.letra === correct) b.classList.add("correct");
+  });
+
+  logData("exercise_answer", { chosen, correct, correct_answer: chosen === correct });
+
+  if (chosen === correct) {
+    btn.classList.add("correct");
+    fb.innerHTML = `<span style="color:var(--success);font-weight:600">✓ Correcto.</span> ${expOk}`;
+  } else {
+    btn.classList.add("wrong");
+    fb.innerHTML = `<span style="color:var(--error);font-weight:600">✗ No es la correcta.</span> ${expErr} La respuesta correcta era <strong>${correct}</strong>.`;
+  }
+
+  setTimeout(async () => {
+    if (state.exercisesDone < 2) {
+      addBubble("bot", chosen === correct
+        ? "¡Muy bien! Hagamos otro ejercicio."
+        : "No te preocupes, practiquemos un poco más.", false);
+      await generateExercise(levelKey);
+    } else {
+      startApplication(levelKey);
+    }
+  }, 1400);
+}
+
+// ============================================================
+// INICIO DE APLICACIÓN REAL POR NIVEL
+// ============================================================
+function startApplication(levelKey) {
+  state.phase = "application";
+
+  // Verificar fecha límite
+  const fechaLimite = new Date("2026-07-11");
+  const hoy = new Date();
+  if (hoy > fechaLimite) {
+    addBubble("bot", "El periodo de uso del tutor virtual ha concluido el 11 de julio. Gracias por tu participación en el curso.", false);
+    setInput(false);
+    return;
+  }
+
+  const msgs = {
+    nivel1: `Perfecto, terminamos los ejercicios. Ahora es tu turno: delimita tu tema sobre "${state.groupTopic}". Recuerda incluir población específica, contexto geográfico en Perú y periodo temporal. Esta delimitación es provisional — podrás ajustarla en el Nivel 2 según las fuentes que encuentres.`,
+    nivel2: `Bienvenido al Nivel 2, ${state.studentName}. Antes de continuar, dime cuál fue la delimitación provisional que aprobamos en el Nivel 1.`,
+    nivel3: `Ahora plantea la tesis de tu ensayo. Debe ser una afirmación debatible, coherente con tu tema ajustado y argumentable con tus fuentes.`,
+    nivel4: `Cuéntame cuál es el argumento que te asignó tu grupo y qué fuente del Nivel 2 usarás para respaldarlo.`,
+    nivel5: `Redacta tu párrafo de desarrollo. Recuerda incluir: oración temática, desarrollo del argumento, cita a tu fuente y oración de cierre.`,
+    nivel6: `Pega aquí el ensayo completo de tu grupo. Evaluaré específicamente tu párrafo de desarrollo con la rúbrica.`
+  };
+  addBubble("bot", msgs[levelKey] || "", false);
+  setInput(true);
+}
+
+// ============================================================
+// INICIO DE CADA NIVEL
+// ============================================================
+function startLevel(level) {
+  const intros = {
+    1: `¡Excelente ${state.studentName}! Comenzamos el Nivel 1: Delimitación provisional del tema. Primero te daré una pequeña clase sobre este concepto, luego haremos dos ejercicios de práctica y finalmente delimitas tu propio tema. ¡Empecemos!`,
+    2: `¡Nivel 1 superado! Ahora el Nivel 2: Revisión de fuentes. Comenzamos con una clase breve sobre fuentes académicas, luego dos ejercicios y después trabajas con tus propias fuentes.`,
+    3: `¡Muy bien! Nivel 3: Planteamiento de la tesis. Te explico primero qué es una tesis y cómo construirla, luego practicamos y aplicas con tu tema.`,
+    4: `¡Excelente! Nivel 4: Esquema de argumentos. Aprenderás cómo estructurar tu esquema con argumento, evidencias y análisis antes de elaborarlo.`,
+    5: `¡Vamos muy bien! Nivel 5: Párrafo de desarrollo. Te explico los parámetros del párrafo académico antes de que lo redactes.`,
+    6: `¡Último nivel! Nivel 6: Revisión final con rúbrica. Te explico cómo funciona la evaluación antes de que pegues tu ensayo.`
+  };
+
+  const levelKeys = ["", "nivel1", "nivel2", "nivel3", "nivel4", "nivel5", "nivel6"];
+  const levelKey = levelKeys[level];
+
+  addBubble("bot", intros[level] || "", false);
+  setTimeout(() => generateMiniClass(levelKey), 800);
+}
+
+async function generateMiniClass(levelKey) {
+  addTyping();
+  const levelKeys = ["", "nivel1", "nivel2", "nivel3", "nivel4", "nivel5", "nivel6"];
+  const levelIndex = levelKeys.indexOf(levelKey);
+  const otherTopics = TOPICS.filter(t => t !== state.topic);
+  const exTopic = otherTopics[Math.floor(Math.random() * otherTopics.length)];
+
+  const classPrompts = {
+    nivel1: `Genera una clase introductoria breve (5-6 oraciones) sobre cómo delimitar un tema académico. Incluye: qué es delimitar, los tres elementos obligatorios (población, lugar, periodo), cómo las fuentes pueden ajustar la delimitación, y un ejemplo usando el tema "${exTopic}" en contexto peruano. Termina con una pregunta motivadora para los ejercicios. Sin markdown ni asteriscos.`,
+    nivel2: `Genera una clase introductoria breve (5-6 oraciones) sobre fuentes académicas para escritura universitaria. Incluye: qué es una fuente académica, cómo distinguirla de una no académica, los elementos de una referencia bibliográfica, y un ejemplo usando el tema "${exTopic}". Termina con una pregunta motivadora. Sin markdown ni asteriscos.`,
+    nivel3: `Genera una clase introductoria breve (5-6 oraciones) sobre la tesis en el ensayo académico. Incluye: qué es una tesis, diferencia entre tesis/tema/pregunta, cómo construir una afirmación debatible, y un ejemplo usando el tema "${exTopic}". Termina con una pregunta motivadora. Sin markdown ni asteriscos.`,
+    nivel4: `Genera una clase introductoria breve (5-6 oraciones) sobre el esquema de desarrollo del ensayo. Incluye: qué es el esquema, qué son las evidencias (ideas extraídas de fuentes con citas), qué es el análisis (ideas que explican el uso de las evidencias), cómo redactarlo en frases no en párrafos. Usa el tema "${exTopic}" como ejemplo. Sin markdown ni asteriscos.`,
+    nivel5: `Genera una clase introductoria breve (5-6 oraciones) sobre el párrafo de desarrollo académico. Incluye: qué es una oración bimembre, cómo encabezar con el argumento, cómo combinar evidencia y análisis, cómo citar en APA 7ma brevemente, y la extensión de 200-250 palabras. Usa el tema "${exTopic}" como ejemplo. Sin markdown ni asteriscos.`,
+    nivel6: `Genera una clase introductoria breve (5-6 oraciones) sobre cómo funciona la rúbrica de evaluación gamificada. Explica los tres niveles (Principiante, En proceso, Experto), qué criterios se evalúan, por qué la argumentación y el análisis son los más importantes, y qué debe revisar el alumno antes de pegar su texto. Sin markdown ni asteriscos.`
+  };
+
+  try {
+    const reply = await callClaude(
+      `Eres un tutor virtual de escritura académica de la UNMSM. Genera clases introductorias breves, claras y motivadoras para universitarios de primer año. Responde siempre en español sin markdown ni asteriscos.`,
+      [{ role: "user", content: classPrompts[levelKey] || classPrompts.nivel1 }]
+    );
+    removeTyping();
+    addBubble("bot", reply, false);
+    logData("mini_class_shown", { level: levelIndex, levelKey });
+
+    // Después de la clase, ejercicios o aplicación
+    setTimeout(() => {
+      if (levelIndex <= 3) {
+        addBubble("bot", "Ahora practiquemos con dos ejercicios antes de trabajar con tu tema. ¡Adelante!", false);
+        setTimeout(() => generateExercise(levelKey), 600);
+      } else {
+        startApplication(levelKey);
+      }
+    }, 1000);
+
+  } catch(e) {
+    removeTyping();
+    // Si falla la clase, continúa directamente
+    if (levelIndex <= 3) {
+      generateExercise(levelKey);
+    } else {
+      startApplication(levelKey);
+    }
+  }
+}
+
+// ============================================================
+// EXTRAS OPCIONALES
+// ============================================================
+async function activateExtra(tipo) {
+  const names = {
+    introduccion: "Introducción",
+    conclusion: "Conclusión",
+    ortografia: "Revisión ortográfica",
+    coherencia: "Análisis de coherencia interna",
+    cohesion: "Verificación de cohesión entre párrafos",
+    registro: "Evaluación de registro académico"
+  };
+
+  addBubble("user", `Quiero usar el extra: ${names[tipo]}`, false);
+  setInput(false);
+  addTyping();
+
+  const extraPrompts = {
+    introduccion: `El alumno quiere ayuda para redactar la introducción de su ensayo sobre "${state.topic}" con tesis: "${state.thesis}". Guíalo paso a paso para construir una introducción académica sólida.`,
+    conclusion: `El alumno quiere ayuda para redactar la conclusión de su ensayo sobre "${state.topic}". Guíalo para sintetizar los argumentos y cerrar coherentemente.`,
+    ortografia: `El alumno quiere revisión ortográfica de su texto. Pídele que pegue el texto y luego señala los errores de tildación, mayúsculas, grafías y puntuación.`,
+    coherencia: `El alumno quiere análisis de coherencia interna. Pídele que pegue el texto y evalúa si las ideas se relacionan lógicamente entre sí.`,
+    cohesion: `El alumno quiere verificación de cohesión. Pídele que pegue el texto y evalúa el uso de conectores y la articulación entre párrafos.`,
+    registro: `El alumno quiere evaluación del registro académico. Pídele que pegue el texto y evalúa si el léxico y estilo son apropiados para un ensayo universitario.`
+  };
+
+  logData("extra_activated", { tipo, name: names[tipo] });
+
+  try {
+    const systemExtra = getSystemPrompt() + `\n\nEXTRA ACTIVADO: ${names[tipo]}. ${extraPrompts[tipo]}`;
+    const reply = await callClaude(systemExtra, [{ role: "user", content: `Activo el extra: ${names[tipo]}` }]);
+    removeTyping();
+    addBubble("bot", reply, false);
+    setInput(true);
+  } catch(e) {
+    removeTyping();
+    addBubble("bot", "Error al activar el extra. Intenta de nuevo.", false);
+    setInput(true);
+  }
+}
+
+// ============================================================
+// ENVIAR MENSAJE
+// ============================================================
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text || !state.inputEnabled) return;
+  input.value = "";
+  addBubble("user", text, false);
+  await botRespond(text);
+}
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ============================================================
+// SELECTOR DE TEMA
+// ============================================================
+function renderTopicSelector() {
+  const body = addBubble("bot", "");
+  let html = `<div style="margin-bottom:10px">Selecciona el tema de tu ensayo o propón uno propio:</div><div class="topic-grid">`;
+  TOPICS.forEach(t => {
+    html += `<button class="topic-btn" onclick="selectTopic('${t}')">${t}</button>`;
+  });
+  html += `</div>
+  <div style="margin-top:12px">
+    <div style="font-size:12px;color:var(--muted);margin-bottom:6px">¿Tienes otro tema en mente? Debe ser una problemática social peruana:</div>
+    <div style="display:flex;gap:8px">
+      <input id="custom-topic-input" type="text" placeholder="Escribe tu propio tema..." style="flex:1;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);background:var(--bg);outline:none;">
+      <button onclick="proposeCustomTopic()" style="background:var(--accent);color:white;border:none;border-radius:10px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Proponer</button>
+    </div>
+  </div>`;
+  body.innerHTML = html;
+  scrollDown();
+}
+
+async function proposeCustomTopic() {
+  const input = document.getElementById("custom-topic-input");
+  const topic = input.value.trim();
+  if (!topic) return;
+
+  // Disable all buttons and input
+  document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = true; b.style.opacity = "0.5"; });
+  input.disabled = true;
+
+  addBubble("user", topic, false);
+  setInput(false);
+  addTyping();
+
+  // Validate with Claude
+  try {
+    const reply = await callClaude(
+      `Eres un tutor de escritura académica de la UNMSM. Tu tarea es validar si un tema propuesto por un alumno es una problemática social peruana válida para un ensayo universitario.
+      
+CRITERIOS DE VALIDACIÓN:
+1. Debe ser una problemática social — no un tema científico, tecnológico o de entretenimiento
+2. Debe referirse al Perú — aunque puede incluir comparaciones con otros países
+3. Debe ser un tema sobre el que existan fuentes académicas disponibles
+4. No debe ser demasiado amplio ni demasiado específico
+
+Si el tema ES válido responde exactamente: TEMA_VALIDO
+Si el tema NO es válido explica brevemente por qué y sugiere cómo ajustarlo para que sea válido.
+Responde siempre en español, máximo 3 oraciones, sin markdown.`,
+      [{ role: "user", content: `El alumno propone este tema: "${topic}"` }]
+    );
+    removeTyping();
+
+    if (reply.includes("TEMA_VALIDO")) {
+      await selectTopic(topic);
+    } else {
+      addBubble("bot", reply, false);
+      input.disabled = false;
+      document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = false; b.style.opacity = "1"; });
+      setInput(false);
+    }
+  } catch(e) {
+    removeTyping();
+    addBubble("bot", "No pude validar el tema. Intenta de nuevo.", false);
+    input.disabled = false;
+    document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = false; b.style.opacity = "1"; });
+  }
+}
+
+async function selectTopic(topic) {
+  state.topic = topic;
+  state.groupTopic = topic;
+  document.querySelectorAll(".topic-btn").forEach(b => {
+    b.disabled = true;
+    b.style.opacity = b.textContent === topic ? "1" : "0.5";
+    if (b.textContent === topic) b.style.borderColor = "var(--accent2)";
+  });
+  addBubble("user", topic, false);
+  logData("topic_selected", { topic, group: state.groupNumber, student: state.studentName });
+  state.currentLevel = 1;
+  updateProgress(1);
+  setTimeout(() => startLevel(1), 600);
+}
+
+// ============================================================
+// ARRANQUE — Flujo: Bienvenida → Nombre → Número de grupo → Tema
+// ============================================================
+setInput(false);
+
+// Verificar fecha límite al inicio
+const fechaLimiteInicio = new Date("2026-07-11");
+const hoyInicio = new Date();
+if (hoyInicio > fechaLimiteInicio) {
+  addBubble("bot", "El periodo de uso del tutor virtual del curso de Lenguaje ha concluido el 11 de julio de 2026. Gracias por tu participación.", false);
+} else {
+  // Verificar si hay progreso guardado
+  const savedProgress = loadProgress();
+  if (savedProgress && savedProgress.studentName && savedProgress.currentLevel > 0) {
+    // Restaurar estado
+    Object.assign(state, savedProgress);
+    addBubble("bot", `Bienvenido de nuevo, ${state.studentName}. Veo que tienes progreso guardado hasta el ${LEVELS[state.currentLevel].name}.`, false);
+    setTimeout(() => {
+      const body = addBubble("bot", "");
+      body.innerHTML = `<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+        <button onclick="resumeProgress()" style="background:var(--accent);color:white;border:none;border-radius:10px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer">Continuar donde lo dejé</button>
+        <button onclick="startFresh()" style="background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px 16px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Empezar de nuevo</button>
+      </div>`;
+      setInput(false);
+    }, 600);
+  } else {
+    startNewSession();
+  }
+}
+
+function resumeProgress() {
+  updateProgress(state.currentLevel);
+  addBubble("bot", `Continuamos en el ${LEVELS[state.currentLevel].name}. ¡Adelante!`, false);
+  setTimeout(() => startLevel(state.currentLevel), 600);
+}
+
+function startFresh() {
+  clearProgress();
+  Object.assign(state, {
+    currentLevel: 0, topic: null, phase: "welcome", exercisesDone: 0,
+    history: [], inputEnabled: false, studentName: null, groupNumber: null,
+    groupSize: null, groupTopic: null, delimitacion: null, thesis: null,
+    sources: [], argument: null, completedLevels: [], dataLog: []
+  });
+  addBubble("bot", "Empezamos de nuevo. ¿Cuál es tu nombre?", false);
+  setInput(true);
+  setupWelcomeFlow();
+}
+
+function startNewSession() {
+  addBubble("bot", "Bienvenido al Tutor Lenguaje de la UNMSM. Te acompañaré paso a paso en la escritura de tu ensayo académico.", false);
+
+setTimeout(() => {
+  addBubble("bot", "Trabajaremos por 6 niveles hasta completar tu ensayo. Antes de comenzar necesito algunos datos. ¿Cuál es tu nombre?", false);
+  setInput(true);
+  setupWelcomeFlow();
+}, 1000);
+}
+
+function setupWelcomeFlow() {
+  const origSend = sendMessage;
+
+  window.sendMessage = async function() {
+
+    // Paso 1: nombre
+    if (!state.studentName) {
+      const name = input.value.trim();
+      if (!name) return;
+      state.studentName = name;
+      input.value = "";
+      addBubble("user", name, false);
+      logData("student_registered", { name });
+      addBubble("bot", `Hola ${name}. ¿Cuál es el número de tu grupo?`, false);
+      return;
+    }
+
+    // Paso 2: número de grupo
+    if (!state.groupNumber) {
+      const num = input.value.trim();
+      if (!num) return;
+      if (isNaN(num) || parseInt(num) < 1) {
+        addBubble("bot", "Por favor ingresa un número de grupo válido (ejemplo: 1, 2, 3...).", false);
+        return;
+      }
+      state.groupNumber = parseInt(num);
+      input.value = "";
+      addBubble("user", `Grupo ${state.groupNumber}`, false);
+      logData("group_registered", { group: state.groupNumber });
+      addBubble("bot", `Perfecto, eres del Grupo ${state.groupNumber}. ¿Cuántos integrantes tiene tu grupo?`, false);
+      return;
+    }
+
+    // Paso 3: tamaño del grupo
+    if (!state.groupSize) {
+      const size = input.value.trim();
+      if (!size) return;
+      const n = parseInt(size);
+      if (isNaN(n) || n < 1 || n > 4) {
+        addBubble("bot", "Por favor ingresa un número válido entre 1 y 4.", false);
+        return;
+      }
+      state.groupSize = n;
+      input.value = "";
+      const msg = n === 1
+        ? "Trabajarás de forma individual. Ahora elige el tema de tu ensayo:"
+        : `Tu grupo tiene ${n} integrantes. Ahora elige el tema que acordaron para el ensayo:`;
+      addBubble("user", `${n} integrante${n > 1 ? "s" : ""}`, false);
+      logData("group_size_registered", { group: state.groupNumber, size: n });
+      addBubble("bot", msg, false);
+      setInput(false);
+      setTimeout(() => renderTopicSelector(), 600);
+      return;
+    }
+
+    await origSend();
+  };
+}
+
+setTimeout(() => {}, 1000);
+} // fin else fecha límite
+</script>
+</body>
+</html>
