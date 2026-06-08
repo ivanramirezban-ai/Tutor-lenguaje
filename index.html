@@ -1318,50 +1318,23 @@ function renderTopicSelector() {
 }
 
 async function proposeCustomTopic() {
-  const input = document.getElementById("custom-topic-input");
-  const topic = input.value.trim();
+  const customInput = document.getElementById("custom-topic-input");
+  const topic = customInput.value.trim();
   if (!topic) return;
+
+  if (topic.length < 5) {
+    addBubble("bot", "El tema es muy corto. Por favor describe mejor la problemática.", false);
+    return;
+  }
 
   // Disable all buttons and input
   document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = true; b.style.opacity = "0.5"; });
-  input.disabled = true;
+  customInput.disabled = true;
 
   addBubble("user", topic, false);
-  setInput(false);
-  addTyping();
+  addBubble("bot", `Perfecto, trabajarás sobre "${topic}". Recuerda que el tema debe referirse al Perú — si necesitas ajustarlo podrás hacerlo en el Nivel 2 según las fuentes que encuentres.`, false);
 
-  // Validate with Claude
-  try {
-    const reply = await callClaude(
-      `Eres un tutor de escritura académica de la UNMSM. Tu tarea es validar si un tema propuesto por un alumno es una problemática social peruana válida para un ensayo universitario.
-      
-CRITERIOS DE VALIDACIÓN:
-1. Debe ser una problemática social — no un tema científico, tecnológico o de entretenimiento
-2. Debe referirse al Perú — aunque puede incluir comparaciones con otros países
-3. Debe ser un tema sobre el que existan fuentes académicas disponibles
-4. No debe ser demasiado amplio ni demasiado específico
-
-Si el tema ES válido responde exactamente: TEMA_VALIDO
-Si el tema NO es válido explica brevemente por qué y sugiere cómo ajustarlo para que sea válido.
-Responde siempre en español, máximo 3 oraciones, sin markdown.`,
-      [{ role: "user", content: `El alumno propone este tema: "${topic}"` }]
-    );
-    removeTyping();
-
-    if (reply.includes("TEMA_VALIDO")) {
-      await selectTopic(topic);
-    } else {
-      addBubble("bot", reply, false);
-      input.disabled = false;
-      document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = false; b.style.opacity = "1"; });
-      setInput(false);
-    }
-  } catch(e) {
-    removeTyping();
-    addBubble("bot", "No pude validar el tema. Intenta de nuevo.", false);
-    input.disabled = false;
-    document.querySelectorAll(".topic-btn").forEach(b => { b.disabled = false; b.style.opacity = "1"; });
-  }
+  setTimeout(() => selectTopic(topic), 600);
 }
 
 async function selectTopic(topic) {
