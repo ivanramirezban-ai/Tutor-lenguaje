@@ -540,9 +540,8 @@ function clearProgress() {
   } catch(e) {}
 }
 
-const API_KEY = "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";
-const ELEVENLABS_API_KEY = "sk_b88a1dcd50c091fc6afb63c227c727f8cc29df266734fbf4";
-const ELEVENLABS_VOICE_ID = "qjnjSEiHF0G6theFSflX";
+// API keys are now handled by the proxy server
+const PROXY_URL = "https://tutor-lenguaje-proxy-production.up.railway.app";
 
 // Cola de audio para evitar que se mezclen
 let audioQueue = [];
@@ -566,11 +565,10 @@ async function speakText(text) {
     const clean = text.replace(/<[^>]*>/g, "").replace(/[#*_`]/g, "").trim();
     if (!clean || clean.length < 10 || clean.length > 600) return;
 
-    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`, {
+    const res = await fetch(PROXY_URL + "/api/voice", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "xi-api-key": ELEVENLABS_API_KEY
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         text: clean,
@@ -734,13 +732,10 @@ function logData(event, data) {
 // API CALL
 // ============================================================
 async function callClaude(system, messages, json = false) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch(PROXY_URL + "/api/chat", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": API_KEY,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
       model: "claude-haiku-4-5-20251001",
