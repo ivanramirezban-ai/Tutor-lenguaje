@@ -749,7 +749,12 @@ async function callClaude(system, messages, json = false) {
   const data = await res.json();
   if (!data.content) throw new Error(JSON.stringify(data));
   const text = data.content[0].text.trim();
-  if (json) return JSON.parse(text.replace(/```json|```/g, "").trim());
+  if (json) {
+    // Extraer JSON aunque venga envuelto en texto
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No JSON found in response: " + text.substring(0, 100));
+    return JSON.parse(jsonMatch[0]);
+  }
   return text;
 }
 
@@ -932,8 +937,10 @@ Criterio 4 — Argumentación (individual, máx. 4 pts):
 
 Criterio 5 — Coherencia y cohesión (individual, máx. 3 pts):
   Principiante (0-1): sin conectores, texto desarticulado o extensión fuera del rango 200-250 palabras
-  En proceso (1.5-2): algunos conectores, coherencia parcial, extensión cercana al rango
-  Experto (2.5-3): conectores apropiados, texto fluido, extensión dentro del rango 200-250 palabras
+  En proceso (1.5-2): algunos conectores, coherencia parcial, extensión cercana al rango pero no exacta
+  Experto (2.5-3): conectores apropiados, texto fluido, extensión ESTRICTAMENTE dentro del rango 200-250 palabras
+
+REGLA INNEGOCIABLE DE EXTENSIÓN: Cuenta las palabras del párrafo. Si son menos de 200 o más de 250, NO puede ser Experto en este criterio — máximo En proceso (1.5). No hay "margen de aceptación" por calidad del análisis. La extensión es un criterio formal obligatorio.
 
 Criterio 6 — Gramática (individual, máx. 2 pts):
   Principiante (0-0.5): oraciones unimembres frecuentes, léxico inapropiado para registro académico
