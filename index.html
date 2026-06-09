@@ -960,25 +960,47 @@ async function botRespond(userMsg) {
 
   try {
     const isLevel6 = state.currentLevel === 6 && state.phase === "application";
-    const reply = await callClaude(getSystemPrompt(), state.history, isLevel6);
+    // En nivel 6 intentamos JSON pero si falla, tratamos como texto
+    let reply;
+    let isJsonReply = false;
+    if (isLevel6) {
+      try {
+        reply = await callClaude(getSystemPrompt(), state.history, true);
+        isJsonReply = typeof reply === "object" && reply !== null;
+      } catch(jsonErr) {
+        // El modelo no devolvió JSON válido — obtener la respuesta como texto
+        reply = await callClaude(getSystemPrompt(), state.history, false);
+        isJsonReply = false;
+      }
+    } else {
+      reply = await callClaude(getSystemPrompt(), state.history, false);
+    }
     removeTyping();
-    state.history.push({ role: "assistant", content: isLevel6 ? JSON.stringify(reply) : reply });
+    state.history.push({ role: "assistant", content: isJsonReply ? JSON.stringify(reply) : reply });
 
-    if (isLevel6 && typeof reply === "object") {
+    if (isJsonReply) {
       renderRubric(reply);
       logData("rubric_result", { nota: reply.nota_total, criterios: reply.criterios });
     } else if (typeof reply === "string" && reply.includes("NIVEL_APROBADO")) {
-      const clean = reply.replace("NIVEL_APROBADO", "").trim();
-      if (clean) addBubble("bot", clean, false);
-      logData("level_approved", { level: state.currentLevel });
-      setTimeout(() => showLevelComplete(), 800);
+      // Solo aprobar si estamos realmente en la fase de aplicación
+      if (state.phase === "application") {
+        const clean = reply.replace("NIVEL_APROBADO", "").trim();
+        if (clean) addBubble("bot", clean, false);
+        logData("level_approved", { level: state.currentLevel });
+        setTimeout(() => showLevelComplete(), 800);
+      } else {
+        // Si no estamos en aplicación, mostrar el mensaje sin aprobar
+        const clean = reply.replace("NIVEL_APROBADO", "").trim();
+        addBubble("bot", clean || reply, false);
+        setInput(true);
+      }
     } else {
       addBubble("bot", reply, false);
       setInput(true);
     }
   } catch(e) {
     removeTyping();
-    addBubble("bot", "Error: " + e.message + " || " + e.toString(), false);
+    addBubble("bot", "Hubo un error de conexión. Por favor intenta de nuevo.", false);
     setInput(true);
   }
 }
