@@ -541,7 +541,7 @@ function clearProgress() {
 }
 
 // Clave API de Anthropic — reemplaza con tu clave real
-const ANTHROPIC_API_KEY = "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";
+const ANTHROPIC_API_KEY = "";
 // Proxy para ElevenLabs (voz) — si está caído, el audio se omite silenciosamente
 const PROXY_URL = "https://tutor-lenguaje-proxy.onrender.com";
 
@@ -734,16 +734,13 @@ function logData(event, data) {
 // API CALL
 // ============================================================
 async function callClaude(system, messages, json = false) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch(PROXY_URL + "/api/chat", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
+      "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1000,
       system,
       messages
