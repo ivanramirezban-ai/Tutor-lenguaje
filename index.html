@@ -967,22 +967,29 @@ async function botRespond(userMsg) {
 
   try {
     const isLevel6 = state.currentLevel === 6 && state.phase === "application";
-    // En nivel 6 intentamos JSON pero si falla, tratamos como texto
-    let reply;
+    // Siempre pedimos texto; para nivel 6 extraemos el JSON manualmente
+    const replyText = await callClaude(getSystemPrompt(), state.history, false);
+    removeTyping();
+
     let isJsonReply = false;
+    let reply = replyText;
     if (isLevel6) {
+      // Intentar extraer JSON del texto de respuesta
       try {
-        reply = await callClaude(getSystemPrompt(), state.history, true);
-        isJsonReply = typeof reply === "object" && reply !== null;
-      } catch(jsonErr) {
-        // El modelo no devolvió JSON válido — obtener la respuesta como texto
-        reply = await callClaude(getSystemPrompt(), state.history, false);
+        const jsonMatch = replyText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.criterios && parsed.nota_total !== undefined) {
+            reply = parsed;
+            isJsonReply = true;
+          }
+        }
+      } catch(e) {
+        // No era JSON válido, mostrar como texto
         isJsonReply = false;
       }
-    } else {
-      reply = await callClaude(getSystemPrompt(), state.history, false);
     }
-    removeTyping();
+
     state.history.push({ role: "assistant", content: isJsonReply ? JSON.stringify(reply) : reply });
 
     if (isJsonReply) {
