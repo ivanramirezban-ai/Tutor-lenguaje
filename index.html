@@ -540,7 +540,9 @@ function clearProgress() {
   } catch(e) {}
 }
 
-// API keys are now handled by the proxy server
+// Clave API de Anthropic — reemplaza con tu clave real
+const ANTHROPIC_API_KEY = "TU_API_KEY_AQUI";
+// Proxy para ElevenLabs (voz) — si está caído, el audio se omite silenciosamente
 const PROXY_URL = "https://tutor-lenguaje-proxy.onrender.com";
 
 // Cola de audio para evitar que se mezclen
@@ -732,10 +734,13 @@ function logData(event, data) {
 // API CALL
 // ============================================================
 async function callClaude(system, messages, json = false) {
-  const res = await fetch(PROXY_URL + "/api/chat", {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true"
     },
     body: JSON.stringify({
       model: "claude-haiku-4-5-20251001",
@@ -976,7 +981,7 @@ async function botRespond(userMsg) {
     }
   } catch(e) {
     removeTyping();
-    addBubble("bot", "Hubo un error de conexión. Por favor intenta de nuevo.", false);
+    addBubble("bot", "Error: " + e.message + " || " + e.toString(), false);
     setInput(true);
   }
 }
