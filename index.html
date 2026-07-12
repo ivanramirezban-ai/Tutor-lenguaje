@@ -513,9 +513,9 @@ async function callClaude(system, messages, json = false) {
 // ============================================================
 function getSystemPrompt() {
   const otherTopics = TOPICS.filter(t => t !== state.topic).slice(0, 5).join(", ");
-  const fechaLimite = new Date("2026-07-18");
+  const fechaLimite = new Date("2026-07-18T23:59:59-05:00");
   const hoy = new Date();
-  const sistemaVencido = hoy > fechaLimite;
+  const sistemaVencido = false;
 
   return `Eres un tutor virtual de escritura académica del curso de Lenguaje de la Universidad Nacional Mayor de San Marcos (UNMSM), Lima, Perú. Representas al docente del curso.
 
