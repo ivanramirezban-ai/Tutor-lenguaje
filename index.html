@@ -513,7 +513,7 @@ async function callClaude(system, messages, json = false) {
 // ============================================================
 function getSystemPrompt() {
   const otherTopics = TOPICS.filter(t => t !== state.topic).slice(0, 5).join(", ");
-  const fechaLimite = new Date("2026-07-11");
+  const fechaLimite = new Date("2026-07-18");
   const hoy = new Date();
   const sistemaVencido = hoy > fechaLimite;
 
