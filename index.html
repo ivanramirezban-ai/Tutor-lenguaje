@@ -840,9 +840,9 @@ function startApplication(levelKey) {
   state.phase = "application";
 
   // Verificar fecha límite
-  const fechaLimite = new Date("2026-07-11");
+  const fechaLimite = new Date("2026-07-18");
   const hoy = new Date();
-  if (hoy > fechaLimite) {
+  if (false) {
     addBubble("bot", "El periodo de uso del tutor virtual ha concluido el 11 de julio. Gracias por tu participación en el curso.", false);
     setInput(false);
     return;
@@ -947,9 +947,9 @@ async function selectTopic(topic) {
 setInput(false);
 
 // Verificar fecha límite al inicio
-const fechaLimiteInicio = new Date("2026-07-11");
+const fechaLimiteInicio = new Date("2026-07-18");
 const hoyInicio = new Date();
-if (hoyInicio > fechaLimiteInicio) {
+if (false) {
   addBubble("bot", "El periodo de uso del tutor virtual del curso de Lenguaje ha concluido el 11 de julio de 2026. Gracias por tu participación.", false);
 } else {
   // Verificar si hay progreso guardado
