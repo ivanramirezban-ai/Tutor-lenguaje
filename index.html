@@ -269,7 +269,19 @@ button#send-btn:disabled { opacity: 0.5; cursor: default; }
     <p style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em">Tutor Virtual · Lenguaje UNMSM</p>
     <h1>Tutor Lenguaje</h1>
   </div>
+  <button onclick="showProgress()" id="btn-progreso" style="display:none;margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">Ver mi progreso</button>
 </header>
+
+<!-- Modal de progreso -->
+<div id="modal-progreso" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;overflow-y:auto">
+  <div style="background:white;max-width:700px;margin:40px auto;border-radius:12px;padding:24px;font-family:'DM Sans',sans-serif">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="font-size:18px;color:#1a1a1a">Mi progreso</h2>
+      <button onclick="closeProgress()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#666">✕</button>
+    </div>
+    <div id="progreso-contenido"></div>
+  </div>
+</div>
 
 <div class="chat-area" id="chat"></div>
 
@@ -734,6 +746,7 @@ async function botRespond(userMsg) {
         const clean = reply.replace("NIVEL_APROBADO", "").trim();
         if (clean) addBubble("bot", clean, false);
         logData("level_approved", { level: state.currentLevel });
+        updateProgressBtn();
         setTimeout(() => showLevelComplete(), 800);
       } else {
         // Si no estamos en aplicación, mostrar el mensaje sin aprobar
@@ -957,6 +970,7 @@ if (false) {
   if (savedProgress && savedProgress.studentName && savedProgress.currentLevel > 0) {
     // Restaurar estado
     Object.assign(state, savedProgress);
+    updateProgressBtn();
     addBubble("bot", `Bienvenido de nuevo, ${state.studentName}. Veo que tienes progreso guardado hasta el ${LEVELS[state.currentLevel].name}.`, false);
     setTimeout(() => {
       const body = addBubble("bot", "");
@@ -1058,6 +1072,95 @@ function setupWelcomeFlow() {
     await origSend();
   };
 } // fin setupWelcomeFlow y else fecha límite
+
+// ============================================================
+// PANEL DE PROGRESO (solo lectura)
+// ============================================================
+function showProgress() {
+  const contenido = document.getElementById("progreso-contenido");
+  const niveles = [
+    {
+      num: 1,
+      nombre: "Delimitación del tema",
+      campo: state.delimitacion,
+      label: "Delimitación aprobada"
+    },
+    {
+      num: 2,
+      nombre: "Revisión de fuentes",
+      campo: state.sources && state.sources.length > 0 ? state.sources.join("\n") : null,
+      label: "Fuentes registradas"
+    },
+    {
+      num: 3,
+      nombre: "Planteamiento de tesis",
+      campo: state.thesis,
+      label: "Tesis aprobada"
+    },
+    {
+      num: 4,
+      nombre: "Esquema de argumentos",
+      campo: state.argument,
+      label: "Argumento asignado"
+    }
+  ];
+
+  let html = `<p style="font-size:13px;color:#666;margin-bottom:16px">Estudiante: <strong>${state.studentName || "—"}</strong> · Tema: <strong>${state.groupTopic || "—"}</strong></p>`;
+
+  niveles.forEach(n => {
+    const completado = state.completedLevels && state.completedLevels.includes(n.num);
+    const color = completado ? "#1a6620" : "#999";
+    const badge = completado ? "✓ Completado" : "Pendiente";
+    const badgeBg = completado ? "#d4ebbf" : "#f0f0f0";
+
+    html += `<div style="border:1px solid #e0e0e0;border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-weight:600;font-size:14px;color:#1a1a1a">Nivel ${n.num} — ${n.nombre}</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:10px;background:${badgeBg};color:${color};font-weight:600">${badge}</span>
+      </div>`;
+
+    if (n.campo) {
+      html += `<p style="font-size:12px;color:#666;margin-bottom:4px">${n.label}:</p>
+        <div style="background:#f7f7f7;border-radius:8px;padding:10px;font-size:13px;color:#1a1a1a;white-space:pre-wrap">${n.campo}</div>`;
+    } else if (completado) {
+      html += `<p style="font-size:13px;color:#666;font-style:italic">Información no disponible en este dispositivo.</p>`;
+    } else {
+      html += `<p style="font-size:13px;color:#999;font-style:italic">Aún no completado.</p>`;
+    }
+
+    html += `</div>`;
+  });
+
+  // Nivel 5 y 6
+  [5, 6].forEach(n => {
+    const nombres = { 5: "Párrafo de desarrollo", 6: "Revisión final con rúbrica" };
+    const completado = state.completedLevels && state.completedLevels.includes(n);
+    const color = completado ? "#1a6620" : "#999";
+    const badge = completado ? "✓ Completado" : n <= state.currentLevel ? "En progreso" : "Pendiente";
+    const badgeBg = completado ? "#d4ebbf" : "#f0f0f0";
+
+    html += `<div style="border:1px solid #e0e0e0;border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:600;font-size:14px;color:#1a1a1a">Nivel ${n} — ${nombres[n]}</span>
+        <span style="font-size:11px;padding:3px 10px;border-radius:10px;background:${badgeBg};color:${color};font-weight:600">${badge}</span>
+      </div>
+    </div>`;
+  });
+
+  contenido.innerHTML = html;
+  document.getElementById("modal-progreso").style.display = "block";
+}
+
+function closeProgress() {
+  document.getElementById("modal-progreso").style.display = "none";
+}
+
+function updateProgressBtn() {
+  const btn = document.getElementById("btn-progreso");
+  if (btn && state.currentLevel >= 1) {
+    btn.style.display = "block";
+  }
+}
 </script>
 </body>
 </html>
