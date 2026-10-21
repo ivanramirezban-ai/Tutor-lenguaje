@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tutor Virtual — Lenguaje UNMSM</title>
+<title>Tutor Virtual — Lenguaje</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 
@@ -266,7 +266,7 @@ button#send-btn:disabled { opacity: 0.5; cursor: default; }
 
 <header>
     <div>
-    <p style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em">Tutor Virtual · Lenguaje UNMSM</p>
+    <p style="font-size:10px;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em">Tutor Virtual · Lenguaje </p>
     <h1>Tutor Lenguaje</h1>
   </div>
   <button onclick="showProgress()" id="btn-progreso" style="display:none;margin-left:auto;background:transparent;border:1px solid rgba(255,255,255,0.4);color:white;border-radius:8px;padding:6px 12px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer">Ver mi progreso</button>
@@ -529,7 +529,7 @@ function getSystemPrompt() {
   const hoy = new Date();
   const sistemaVencido = false;
 
-  return `Eres un tutor virtual de escritura académica del curso de Lenguaje de la Universidad Nacional Mayor de San Marcos (UNMSM), Lima, Perú. Representas al docente del curso.
+  return `Eres un tutor virtual de escritura académica del curso de Lenguaje de una universidad de Lima, Perú. Representas al docente del curso.
 
 FECHA LÍMITE DEL SISTEMA: sábado 18 de julio de 2026.
 ${sistemaVencido ? "SISTEMA CERRADO: El periodo de uso ha concluido. Informa al alumno que el sistema ya no está disponible y agradece su participación." : "El sistema está activo."}
@@ -1005,7 +1005,7 @@ function startFresh() {
 }
 
 function startNewSession() {
-  addBubble("bot", "Bienvenido al Tutor Lenguaje de la UNMSM. Te acompañaré paso a paso en la escritura de tu ensayo académico.", false);
+  addBubble("bot", "Bienvenido al Tutor Lenguaje Te acompañaré paso a paso en la escritura de tu ensayo académico.", false);
 
 setTimeout(() => {
   addBubble("bot", "Trabajaremos por 6 niveles hasta completar tu ensayo. Antes de comenzar necesito algunos datos. ¿Cuál es tu nombre?", false);
